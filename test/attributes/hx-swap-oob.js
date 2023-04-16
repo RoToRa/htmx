@@ -18,6 +18,21 @@ describe("hx-swap-oob attribute", function () {
         byId("d1").innerHTML.should.equal("Swapped0");
     })
 
+    it('handles partial table properly', function () {
+        htmx.config.useTemplateFragments = true;
+        try {
+            this.server.respondWith("GET", "/test", "Clicked<tr id='d1' hx-swap-oob='true'><td>Swapped0a</td></tr>");
+            var div = make('<div hx-get="/test">click me</div>');
+            make('<table><tr id="d1"></tr></table>');
+            div.click();
+            this.server.respond();
+            div.innerHTML.should.equal("Clicked");
+            byId("d1").innerHTML.should.equal("<td>Swapped0a</td>");
+        } finally {
+            htmx.config.useTemplateFragments = false;
+        }
+    })
+
     it('handles more than one oob swap properly', function () {
         this.server.respondWith("GET", "/test", "Clicked<div id='d1' hx-swap-oob='true'>Swapped1</div><div id='d2' hx-swap-oob='true'>Swapped2</div>");
         var div = make('<div hx-get="/test">click me</div>');
